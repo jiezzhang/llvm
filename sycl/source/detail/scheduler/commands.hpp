@@ -32,6 +32,9 @@ bool CurrentCodeLocationValid();
 void emitInstrumentationGeneral(uint32_t StreamID, uint64_t InstanceID,
                                 xpti_td *TraceEvent, uint16_t Type,
                                 const char *Txt);
+void emitEnqueuedEventSignalGeneral(uint32_t StreamID, uint64_t InstanceID,
+                                    xpti_td *TraceEvent,
+                                    sycl::detail::pi::PiEvent &PiEventAddr);
 #endif
 
 class queue_impl;
