@@ -279,6 +279,8 @@ event handler::finalize() {
           }
         }
 #ifdef XPTI_ENABLE_INSTRUMENTATION
+        detail::emitEnqueuedEventSignalGeneral(
+            StreamID, InstanceID, CmdTraceEvent, NewEvent->getHandleRef());
         detail::emitInstrumentationGeneral(StreamID, InstanceID, CmdTraceEvent,
                                            xpti::trace_task_end, nullptr);
 #endif

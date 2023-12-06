@@ -75,6 +75,20 @@ void emitInstrumentationGeneral(uint32_t StreamID, uint64_t InstanceID,
                         static_cast<xpti_td *>(TraceEvent), InstanceID,
                         static_cast<const void *>(Txt));
 }
+
+void emitEnqueuedEventSignalGeneral(uint32_t StreamID, uint64_t InstanceID,
+                                    xpti_td *TraceEvent,
+                                    sycl::detail::pi::PiEvent &PiEventAddr) {
+  constexpr uint16_t NotificationTraceType = xpti::trace_signal;
+  if (!(xptiCheckTraceEnabled(StreamID, NotificationTraceType) && TraceEvent &&
+        PiEventAddr))
+    return;
+  // Asynchronous call, so send a signal with the event information as
+  // user_data
+  xptiNotifySubscribers(
+      StreamID, NotificationTraceType, detail::GSYCLGraphEvent,
+      static_cast<xpti_td *>(TraceEvent), InstanceID, (void *)PiEventAddr);
+}
 #endif
 
 #ifdef __SYCL_ENABLE_GNU_DEMANGLING
@@ -788,15 +802,8 @@ Command *Command::addDep(EventImplPtr Event,
 
 void Command::emitEnqueuedEventSignal(sycl::detail::pi::PiEvent &PiEventAddr) {
 #ifdef XPTI_ENABLE_INSTRUMENTATION
-  constexpr uint16_t NotificationTraceType = xpti::trace_signal;
-  if (!(xptiCheckTraceEnabled(MStreamID, NotificationTraceType) &&
-        MTraceEvent && PiEventAddr))
-    return;
-  // Asynchronous call, so send a signal with the event information as
-  // user_data
-  xptiNotifySubscribers(
-      MStreamID, NotificationTraceType, detail::GSYCLGraphEvent,
-      static_cast<xpti_td *>(MTraceEvent), MInstanceID, (void *)PiEventAddr);
+  emitEnqueuedEventSignalGeneral(MStreamID, MInstanceID, MTraceEvent,
+                                 PiEventAddr);
 #endif
 }
 
